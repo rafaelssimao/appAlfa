@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Áudios das letras (cada dev adiciona localmente em assets/sounds/letters/)
+assets/sounds/letters/*.m4a
