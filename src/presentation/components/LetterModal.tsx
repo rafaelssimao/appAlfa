@@ -6,14 +6,18 @@ import {
   StyleSheet,
   Pressable,
   Platform,
+  View,
+  useWindowDimensions,
 } from 'react-native';
 import { colors, spacing, typography } from '../../core/theme';
 import type { LetterItem } from '../../core/types/letter';
+import type { Character } from '../../data/characters';
 import { useLetterSound } from '../hooks/useLetterSound';
 
 interface LetterModalProps {
   visible: boolean;
   letterItem: LetterItem | null;
+  selectedCharacter: Character;
   onClose: () => void;
 }
 
@@ -31,20 +35,28 @@ function mensagemAleatoria() {
   ];
 }
 
-export function LetterModal({ visible, letterItem, onClose }: LetterModalProps) {
+export function LetterModal({
+  visible,
+  letterItem,
+  selectedCharacter,
+  onClose,
+}: LetterModalProps) {
   const { playLetterSound } = useLetterSound();
   const [mensagem, setMensagem] = React.useState('');
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const cardMaxWidth = Math.min(340, (isLandscape ? height : width) - spacing.lg * 2);
 
   useEffect(() => {
     if (visible && letterItem) {
       setMensagem(mensagemAleatoria());
-      playLetterSound(letterItem.id).catch(() => {});
+      playLetterSound(selectedCharacter.id, letterItem.id).catch(() => {});
     }
-  }, [visible, letterItem?.id]);
+  }, [visible, letterItem?.id, selectedCharacter.id]);
 
   const handleTapLetter = () => {
     if (letterItem) {
-      playLetterSound(letterItem.id).catch(() => {});
+      playLetterSound(selectedCharacter.id, letterItem.id).catch(() => {});
     }
     setMensagem(mensagemAleatoria());
   };
@@ -58,9 +70,16 @@ export function LetterModal({ visible, letterItem, onClose }: LetterModalProps) 
       statusBarTranslucent
     >
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
+        <Pressable
+          style={[styles.card, { maxWidth: cardMaxWidth }]}
+          onPress={(e) => e.stopPropagation()}
+        >
           {letterItem ? (
             <>
+              <View style={styles.narratorRow}>
+                <Text style={styles.narratorEmoji}>{selectedCharacter.emoji}</Text>
+                <Text style={styles.narratorName}>{selectedCharacter.name}</Text>
+              </View>
               <Text style={styles.mensagem}>{mensagem || 'Oba! Que letra linda!'}</Text>
 
               <TouchableOpacity
@@ -121,6 +140,20 @@ const styles = StyleSheet.create({
         elevation: 12,
       },
     }),
+  },
+  narratorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: spacing.sm,
+  },
+  narratorEmoji: {
+    fontSize: 28,
+    marginRight: spacing.xs,
+  },
+  narratorName: {
+    ...typography.caption,
+    color: colors.textLight,
   },
   mensagem: {
     ...typography.subtitle,

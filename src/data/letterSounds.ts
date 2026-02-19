@@ -1,6 +1,7 @@
 /**
  * Mapeamento estático dos sons das letras (require para Metro bundler).
- * Arquivos em assets/sounds/letters/ (A.m4a ... Z.m4a).
+ * Voz padrão: assets/sounds/letters/ (A.m4a ... Z.m4a).
+ * Por personagem: usar mesma voz até existir pasta por id (pai/, mae/, etc.).
  */
 export const LETTER_SOUNDS: Record<string, number> = {
   a: require('../../assets/sounds/letters/A.m4a'),
@@ -30,3 +31,11 @@ export const LETTER_SOUNDS: Record<string, number> = {
   y: require('../../assets/sounds/letters/Y.m4a'),
   z: require('../../assets/sounds/letters/Z.m4a'),
 };
+
+/** Retorna o som da letra para o personagem. Por enquanto todos usam a mesma voz. */
+export function getLetterSoundForCharacter(
+  _characterId: string,
+  letterId: string
+): number | undefined {
+  return LETTER_SOUNDS[letterId];
+}
