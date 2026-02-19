@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Audio } from 'expo-av';
 import * as NavigationBar from 'expo-navigation-bar';
-import { CharactersScreen, HomeScreen } from './src/presentation/screens';
+import { CharacterSettingsProvider } from './src/presentation/context/CharacterSettingsContext';
+import {
+  CharactersScreen,
+  CharacterSetupScreen,
+  HomeScreen,
+} from './src/presentation/screens';
 import type { Character } from './src/data/characters';
 
-export default function App() {
+type Screen = 'characters' | 'setup' | 'home';
+
+function AppContent() {
+  const [screen, setScreen] = useState<Screen>('characters');
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
   );
@@ -32,16 +41,48 @@ export default function App() {
     }
   }, [isLandscape]);
 
+  const handleSelectCharacter = (character: Character) => {
+    setSelectedCharacter(character);
+    setScreen('setup');
+  };
+
+  const handleSetupComplete = () => {
+    setScreen('home');
+  };
+
+  const handleBackToMenu = () => {
+    setScreen('characters');
+    setSelectedCharacter(null);
+  };
+
   return (
     <>
       <StatusBar style="dark" />
-      {selectedCharacter === null ? (
-        <CharactersScreen
-          onStart={(character) => setSelectedCharacter(character)}
+      {screen === 'characters' && (
+        <CharactersScreen onSelectCharacter={handleSelectCharacter} />
+      )}
+      {screen === 'setup' && selectedCharacter && (
+        <CharacterSetupScreen
+          character={selectedCharacter}
+          onComplete={handleSetupComplete}
         />
-      ) : (
-        <HomeScreen selectedCharacter={selectedCharacter} />
+      )}
+      {screen === 'home' && selectedCharacter && (
+        <HomeScreen
+          selectedCharacter={selectedCharacter}
+          onBackToMenu={handleBackToMenu}
+        />
       )}
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <CharacterSettingsProvider>
+        <AppContent />
+      </CharacterSettingsProvider>
+    </SafeAreaProvider>
   );
 }

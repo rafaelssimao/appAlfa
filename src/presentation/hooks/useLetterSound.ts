@@ -2,10 +2,11 @@ import { useCallback, useRef } from 'react';
 import { Audio } from 'expo-av';
 import { getLetterSoundForCharacter } from '../../data/letterSounds';
 import { DEFAULT_LETTER_SOUND_URI } from '../../core/constants/sound';
+import type { CharacterLetterSounds } from '../../data/characterSettings';
 
 /**
- * Toca o som da letra na voz do personagem selecionado.
- * Evita condição de corrida ao trocar de letra rápido e faz fallback se o arquivo falhar.
+ * Toca o som da letra na voz do personagem (bundled ou gravado).
+ * customLetterSounds: URIs dos áudios gravados para o personagem.
  */
 export function useLetterSound() {
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -13,14 +14,24 @@ export function useLetterSound() {
   const requestIdRef = useRef(0);
 
   const playLetterSound = useCallback(
-    async (characterId: string | undefined, letterId?: string) => {
+    async (
+      characterId: string | undefined,
+      letterId?: string,
+      customLetterSounds?: CharacterLetterSounds
+    ) => {
       if (!letterId) return;
 
       const key =
         characterId && letterId ? `${characterId}:${letterId}` : letterId;
-      const source =
-        characterId && letterId
+      const customUri = customLetterSounds?.[letterId];
+      const bundledSource =
+        characterId && letterId && !customUri
           ? getLetterSoundForCharacter(characterId, letterId)
+          : undefined;
+      const source = customUri
+        ? { uri: customUri }
+        : bundledSource != null
+          ? bundledSource
           : undefined;
 
       try {
@@ -70,7 +81,7 @@ export function useLetterSound() {
 
         if (source != null) {
           try {
-            await playSource(source);
+            await playSource(source as number | { uri: string });
           } catch {
             if (myRequestId !== requestIdRef.current) return;
             try {

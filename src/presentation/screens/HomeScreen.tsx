@@ -4,11 +4,14 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   useWindowDimensions,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LetterTile } from '../components/LetterTile';
 import { LetterModal } from '../components/LetterModal';
+import { useCharacterSettingsContext } from '../context/CharacterSettingsContext';
 import { LETTERS } from '../../data/letters';
 import { colors, spacing, typography } from '../../core/theme';
 import type { LetterItem } from '../../core/types/letter';
@@ -20,12 +23,15 @@ const MAX_TILE_SIZE = 56;
 
 interface HomeScreenProps {
   selectedCharacter: Character;
+  onBackToMenu: () => void;
 }
 
-export function HomeScreen({ selectedCharacter }: HomeScreenProps) {
+export function HomeScreen({ selectedCharacter, onBackToMenu }: HomeScreenProps) {
   const [selectedLetter, setSelectedLetter] = useState<LetterItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { width, height } = useWindowDimensions();
+  const { getSettings } = useCharacterSettingsContext();
+  const characterSettings = getSettings(selectedCharacter.id);
 
   const isLandscape = width > height;
 
@@ -95,11 +101,30 @@ export function HomeScreen({ selectedCharacter }: HomeScreenProps) {
         <View style={panelCharacterStyle}>
           <Text style={styles.panelLabel}>Seu narrador</Text>
           <View style={styles.characterBox}>
-            <Text style={[styles.characterEmoji, isLandscape && styles.characterEmojiLandscape]}>
-              {selectedCharacter.emoji}
-            </Text>
+            {characterSettings.photoUri ? (
+              <Image
+                source={{ uri: characterSettings.photoUri }}
+                style={[
+                  styles.characterPhoto,
+                  isLandscape && styles.characterPhotoLandscape,
+                ]}
+              />
+            ) : (
+              <Text style={[styles.characterEmoji, isLandscape && styles.characterEmojiLandscape]}>
+                {selectedCharacter.emoji}
+              </Text>
+            )}
             <Text style={styles.characterName}>{selectedCharacter.name}</Text>
           </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBackToMenu}
+            activeOpacity={0.8}
+            accessibilityLabel="Voltar ao menu e trocar de personagem"
+            accessibilityRole="button"
+          >
+            <Text style={styles.backButtonText}>Trocar personagem</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={panelLettersStyle}>
@@ -187,9 +212,32 @@ const styles = StyleSheet.create({
   characterEmojiLandscape: {
     fontSize: 64,
   },
+  characterPhoto: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: spacing.xs,
+  },
+  characterPhotoLandscape: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+  },
   characterName: {
     ...typography.subtitle,
     color: colors.text,
+  },
+  backButton: {
+    marginTop: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: 16,
+    backgroundColor: colors.letterTileBorder,
+  },
+  backButtonText: {
+    ...typography.caption,
+    color: colors.secondary,
+    fontWeight: '600',
   },
   panelLetters: {
     flex: 1,

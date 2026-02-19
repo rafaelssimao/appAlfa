@@ -4,20 +4,20 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
   Platform,
   useWindowDimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CHARACTERS } from '../../data/characters';
 import type { Character } from '../../data/characters';
 import { colors, spacing, typography } from '../../core/theme';
 
 interface CharactersScreenProps {
-  onStart: (character: Character) => void;
+  onSelectCharacter: (character: Character) => void;
 }
 
-export function CharactersScreen({ onStart }: CharactersScreenProps) {
+export function CharactersScreen({ onSelectCharacter }: CharactersScreenProps) {
   const [selected, setSelected] = useState<Character | null>(null);
   const { width } = useWindowDimensions();
   const isLandscape = width > 400;
@@ -28,8 +28,8 @@ export function CharactersScreen({ onStart }: CharactersScreenProps) {
   }, []);
 
   const handleStart = useCallback(() => {
-    if (selected) onStart(selected);
-  }, [selected, onStart]);
+    if (selected) onSelectCharacter(selected);
+  }, [selected, onSelectCharacter]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -65,7 +65,7 @@ export function CharactersScreen({ onStart }: CharactersScreenProps) {
           onPress={handleStart}
           disabled={!selected}
           activeOpacity={0.8}
-          accessibilityLabel="Começar a brincar com as letras"
+          accessibilityLabel="Ir para cadastro do personagem"
           accessibilityRole="button"
           accessibilityState={{ disabled: !selected }}
         >

@@ -8,11 +8,13 @@ import {
   Platform,
   View,
   useWindowDimensions,
+  Image,
 } from 'react-native';
 import { colors, spacing, typography } from '../../core/theme';
 import type { LetterItem } from '../../core/types/letter';
 import type { Character } from '../../data/characters';
 import { useLetterSound } from '../hooks/useLetterSound';
+import { useCharacterSettingsContext } from '../context/CharacterSettingsContext';
 
 interface LetterModalProps {
   visible: boolean;
@@ -42,6 +44,8 @@ export function LetterModal({
   onClose,
 }: LetterModalProps) {
   const { playLetterSound } = useLetterSound();
+  const { getSettings } = useCharacterSettingsContext();
+  const settings = getSettings(selectedCharacter.id);
   const [mensagem, setMensagem] = React.useState('');
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -50,13 +54,21 @@ export function LetterModal({
   useEffect(() => {
     if (visible && letterItem) {
       setMensagem(mensagemAleatoria());
-      playLetterSound(selectedCharacter.id, letterItem.id).catch(() => {});
+      playLetterSound(
+        selectedCharacter.id,
+        letterItem.id,
+        settings.letterSounds
+      ).catch(() => {});
     }
   }, [visible, letterItem?.id, selectedCharacter.id]);
 
   const handleTapLetter = () => {
     if (letterItem) {
-      playLetterSound(selectedCharacter.id, letterItem.id).catch(() => {});
+      playLetterSound(
+        selectedCharacter.id,
+        letterItem.id,
+        settings.letterSounds
+      ).catch(() => {});
     }
     setMensagem(mensagemAleatoria());
   };
@@ -77,7 +89,14 @@ export function LetterModal({
           {letterItem ? (
             <>
               <View style={styles.narratorRow}>
-                <Text style={styles.narratorEmoji}>{selectedCharacter.emoji}</Text>
+                {settings.photoUri ? (
+                  <Image
+                    source={{ uri: settings.photoUri }}
+                    style={styles.narratorPhoto}
+                  />
+                ) : (
+                  <Text style={styles.narratorEmoji}>{selectedCharacter.emoji}</Text>
+                )}
                 <Text style={styles.narratorName}>{selectedCharacter.name}</Text>
               </View>
               <Text style={styles.mensagem}>{mensagem || 'Oba! Que letra linda!'}</Text>
@@ -149,6 +168,12 @@ const styles = StyleSheet.create({
   },
   narratorEmoji: {
     fontSize: 28,
+    marginRight: spacing.xs,
+  },
+  narratorPhoto: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: spacing.xs,
   },
   narratorName: {
