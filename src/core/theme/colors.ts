@@ -1,23 +1,22 @@
 /**
- * Paleta de cores no estilo Tralalelu/Tralala - alegre e envolvente para crianças
+ * Paleta estilo Sonic - cores claras, vibrantes e legíveis para crianças (5 anos)
  */
 export const colors = {
-  background: '#FFF8E7',      // Amarelo creme suave
+  background: '#E3F2FD',       // Azul céu claro
   surface: '#FFFFFF',
-  primary: '#FF6B9D',        // Rosa divertido
-  primaryDark: '#E84A7A',
-  secondary: '#7B68EE',      // Roxo mágico
-  accent: '#FFD93D',         // Amarelo sol
-  success: '#6BCB77',        // Verde natureza
+  primary: '#0088FF',          // Azul Sonic
+  primaryDark: '#0066CC',
+  secondary: '#E53935',        // Vermelho (sapato Sonic)
+  accent: '#FFD700',            // Dourado (anéis)
+  success: '#43A047',          // Verde (Green Hill)
   letterTile: '#FFFFFF',
-  letterTileBorder: '#FFB6C1',
-  text: '#2D3436',
-  textLight: '#636E72',
-  overlay: 'rgba(0,0,0,0.4)',
-  // Cores extras para variedade
-  orange: '#FF9F43',
-  blue: '#54A0FF',
-  mint: '#00D2D3',
+  letterTileBorder: '#0088FF',
+  text: '#1565C0',             // Azul escuro legível
+  textLight: '#42A5F5',
+  overlay: 'rgba(0,0,0,0.35)',
+  orange: '#FF9800',
+  blue: '#0088FF',
+  mint: '#26A69A',
 } as const;
 
 export type Colors = typeof colors;
